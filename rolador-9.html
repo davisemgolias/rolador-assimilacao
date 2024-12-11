@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rolador de Dados - Assimilacao RPG</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    #results {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .result-line {
+      margin-bottom: 10px;
+    }
+    /* Cores para as palavras de status */
+    .pressao {
+      color: blue;  /* Azul */
+    }
+    .adaptacao {
+      color: green; /* Verde */
+    }
+    .sucesso {
+      color: red;   /* Vermelho */
+    }
+    /* Cores para o texto de "Dado X (dY)" */
+    .d6 {
+      color: black; /* Cor neutra para o d6 */
+    }
+    .d10 {
+      color: black; /* Cor neutra para o d10 */
+    }
+    .d12 {
+      color: black; /* Cor neutra para o d12 */
+    }
+  </style>
+</head>
+<body>
+  <h1>Rolador de Dados - Assimilacao RPG</h1>
+  <p>Escolha a quantidade de dados para cada tipo (0 para nenhum dado):</p>
+
+  <div>
+    <label for="diceCount1">Quantidade de Dados d6:</label>
+    <input id="diceCount1" type="number" value="0" min="0">
+    <br><br>
+
+    <label for="diceCount2">Quantidade de Dados d10:</label>
+    <input id="diceCount2" type="number" value="0" min="0">
+    <br><br>
+
+    <label for="diceCount3">Quantidade de Dados d12:</label>
+    <input id="diceCount3" type="number" value="0" min="0">
+  </div>
+
+  <button onclick="rollDice()">Rolar Dados</button>
+
+  <div id="results"></div>
+
+  <script>
+    // Função para interpretar os dados
+    function interpretRoll(roll, dieType) {
+      let interpretation = "";
+      if (dieType == 6) {
+        if (roll <= 2) interpretation = "Nada";
+        else if (roll == 3) interpretation = "Pressao";
+        else if (roll <= 5) interpretation = "Pressao, Adaptacao";
+        else if (roll == 6) interpretation = "Sucesso";
+      } else if (dieType == 10 || dieType == 12) {
+        if (roll <= 2) interpretation = "Nada";
+        else if (roll == 3) interpretation = "Pressao";
+        else if (roll <= 5) interpretation = "Pressao, Adaptacao";
+        else if (roll == 6) interpretation = "Sucesso";
+        else if (roll == 7) interpretation = "Sucesso, Sucesso";
+        else if (roll == 8) interpretation = "Sucesso, Adaptacao";
+        else if (roll == 9) interpretation = "Sucesso, Adaptacao, Pressao";
+        else if (roll == 10) interpretation = "Sucesso, Sucesso, Pressao";
+        else if (roll == 11) interpretation = "Sucesso, Adaptacao, Adaptacao, Pressao";
+        else if (roll == 12) interpretation = "Pressao, Pressao";
+      }
+      return interpretation;
+    }
+
+    // Função para rolar os dados
+    function rollDice() {
+      const diceCount1 = parseInt(document.getElementById("diceCount1").value); // d6
+      const diceCount2 = parseInt(document.getElementById("diceCount2").value); // d10
+      const diceCount3 = parseInt(document.getElementById("diceCount3").value); // d12
+
+      // Se nenhum dado for rolado
+      if (diceCount1 === 0 && diceCount2 === 0 && diceCount3 === 0) {
+        document.getElementById("results").innerHTML = "<p>Nenhum dado rolado.</p>";
+        return;
+      }
+
+      const results = [];
+      let totalSuccesses = 0;
+      let totalPressures = 0;
+      let totalAdaptations = 0;
+
+      // Rolando os dados do tipo d6
+      for (let i = 0; i < diceCount1; i++) {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        const interpretation = interpretRoll(roll, 6);
+        results.push(`<div class="result-line"><span class="d6">Dado ${i + 1} (d6): ${roll} (${applyColor(interpretation)})</span></div>`);
+        if (interpretation.includes("Sucesso")) totalSuccesses++;
+        if (interpretation.includes("Pressao")) totalPressures++;
+        if (interpretation.includes("Adaptacao")) totalAdaptations++;
+      }
+
+      // Rolando os dados do tipo d10
+      for (let i = 0; i < diceCount2; i++) {
+        const roll = Math.floor(Math.random() * 10) + 1;
+        const interpretation = interpretRoll(roll, 10);
+        results.push(`<div class="result-line"><span class="d10">Dado ${i + 1} (d10): ${roll} (${applyColor(interpretation)})</span></div>`);
+        if (interpretation.includes("Sucesso")) totalSuccesses++;
+        if (interpretation.includes("Pressao")) totalPressures++;
+        if (interpretation.includes("Adaptacao")) totalAdaptations++;
+      }
+
+      // Rolando os dados do tipo d12
+      for (let i = 0; i < diceCount3; i++) {
+        const roll = Math.floor(Math.random() * 12) + 1;
+        const interpretation = interpretRoll(roll, 12);
+        results.push(`<div class="result-line"><span class="d12">Dado ${i + 1} (d12): ${roll} (${applyColor(interpretation)})</span></div>`);
+        if (interpretation.includes("Sucesso")) totalSuccesses++;
+        if (interpretation.includes("Pressao")) totalPressures++;
+        if (interpretation.includes("Adaptacao")) totalAdaptations++;
+      }
+
+      // Exibindo os resultados totais
+      document.getElementById("results").innerHTML = `
+        <h2>Resultados:</h2>
+        ${results.join("")}
+        <h3>Totais:</h3>
+        <p><strong>Sucessos:</strong> ${totalSuccesses}</p>
+        <p><strong>Pressao:</strong> ${totalPressures}</p>
+        <p><strong>Adaptacoes:</strong> ${totalAdaptations}</p>
+      `;
+    }
+
+    // Função para aplicar cores nas palavras "Pressao", "Adaptacao", "Sucesso"
+    function applyColor(text) {
+      // Substituindo todas as instâncias de Pressao, Adaptacao, Sucesso
+      text = text.replace(/Pressao/g, '<span class="pressao">Pressao</span>');
+      text = text.replace(/Adaptacao/g, '<span class="adaptacao">Adaptacao</span>');
+      text = text.replace(/Sucesso/g, '<span class="sucesso">Sucesso</span>');
+      return text;
+    }
+  </script>
+</body>
+</html>
